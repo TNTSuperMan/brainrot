@@ -10,19 +10,20 @@ where I: FnMut() -> u8,
     step_remains: Option<usize>,
     input_fn: I,
     output_fn: O,
+    io_break: bool,
 }
 impl<I, O> Program<I, O>
 where I: FnMut() -> u8,
       O: FnMut(u8) -> (),
 {
-    pub fn new(bytecodes: Box<[Bytecode]>, timeout: Option<usize>, input_fn: I, output_fn: O) -> Program<I, O> {
+    pub fn new(bytecodes: Box<[Bytecode]>, timeout: Option<usize>, input_fn: I, output_fn: O, io_break: bool) -> Program<I, O> {
         let ocm = OperationCountMap::new(bytecodes.len());
         Program {
             ocm,
             insts: bytecodes,
             pc: 0,
             step_remains: timeout,
-            input_fn, output_fn,
+            input_fn, output_fn, io_break,
         }
     }
     pub fn check_timeout(&mut self) -> Result<(), RuntimeError> {
@@ -54,6 +55,9 @@ where I: FnMut() -> u8,
     }
     pub fn output(&mut self, value: u8) {
         (self.output_fn)(value)
+    }
+    pub fn io_break(&self) -> bool {
+        self.io_break
     }
 }
 

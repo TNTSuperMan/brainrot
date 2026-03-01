@@ -249,10 +249,18 @@ pub fn run_deopt<I: FnMut() -> u8, O: FnMut(u8) -> ()>(tape: &mut Tape, program:
             Bytecode::In { delta } => {
                 tape.step(*delta as isize);
                 tape.set(program.input())?;
+                if program.io_break() {
+                    program.step();
+                    return Ok(InterpreterResult::IoBreak);
+                }
             }
             Bytecode::Out { delta } => {
                 tape.step(*delta as isize);
                 program.output(tape.get()?);
+                if program.io_break() {
+                    program.step();
+                    return Ok(InterpreterResult::IoBreak);
+                }
             }
 
             Bytecode::JmpIfZero { delta, addr_abs } => {

@@ -4,7 +4,11 @@ pub mod internal;
 mod deopt;
 mod opt;
 
-pub fn run<I: FnMut() -> u8, O: FnMut(u8) -> ()>(tier: &mut Tier, tape: &mut Tape, program: &mut Program<I, O>) -> Result<(), BrainrotError> {
+pub enum BrainrotResult {
+    End, IoBreak,
+}
+
+pub fn run<I: FnMut() -> u8, O: FnMut(u8) -> ()>(tier: &mut Tier, tape: &mut Tape, program: &mut Program<I, O>) -> Result<BrainrotResult, BrainrotError> {
     loop {
         let result = match tier {
             Tier::Deopt => run_deopt(tape, program),
@@ -14,7 +18,10 @@ pub fn run<I: FnMut() -> u8, O: FnMut(u8) -> ()>(tier: &mut Tier, tape: &mut Tap
         };
         match result {
             Ok(InterpreterResult::End) => {
-                return Ok(());
+                return Ok(BrainrotResult::End);
+            }
+            Ok(InterpreterResult::IoBreak) => {
+                return Ok(BrainrotResult::IoBreak)
             }
             Ok(InterpreterResult::ToggleTier(t)) => {
                 *tier = t;

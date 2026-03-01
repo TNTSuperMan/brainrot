@@ -235,10 +235,18 @@ pub unsafe fn run_opt<I: FnMut() -> u8, O: FnMut(u8) -> ()>(tape: &mut UnsafeTap
             Bytecode::In { delta } => {
                 tape.step_ptr((*delta) as isize);
                 tape.set(program.inner.input());
+                if program.inner.io_break() {
+                    program.jump_one();
+                    return Ok(InterpreterResult::IoBreak);
+                }
             }
             Bytecode::Out { delta } => {
                 tape.step_ptr((*delta) as isize);
                 program.inner.output(tape.get());
+                if program.inner.io_break() {
+                    program.jump_one();
+                    return Ok(InterpreterResult::IoBreak);
+                }
             }
 
             Bytecode::JmpIfZero { delta, addr_abs } => {

@@ -6,6 +6,8 @@ mod bytecode;
 mod vm;
 mod trace;
 
+mod brainrot;
+
 pub mod advance {
     pub use crate::ir::*;
 }
