@@ -1,19 +1,28 @@
 use crate::{bytecode::bytecode::Bytecode, error::RuntimeError, trace::OperationCountMap};
 
-pub struct Program<'a> {
+pub struct Program<'a, I, O>
+where I: FnMut() -> u8,
+      O: FnMut(u8) -> (),
+{
     pub ocm: OperationCountMap,
     insts: &'a [Bytecode],
     pc: usize,
     step_remains: Option<usize>,
+    input_fn: I,
+    output_fn: O,
 }
-impl<'a> Program<'a> {
-    pub fn new(bytecodes: &'a [Bytecode], timeout: Option<usize>) -> Program<'a> {
+impl<'a, I, O> Program<'a, I, O>
+where I: FnMut() -> u8,
+      O: FnMut(u8) -> (),
+{
+    pub fn new(bytecodes: &'a [Bytecode], timeout: Option<usize>, input_fn: I, output_fn: O) -> Program<'a, I, O> {
         let ocm = OperationCountMap::new(bytecodes.len());
         Program {
             ocm,
             insts: bytecodes,
             pc: 0,
             step_remains: timeout,
+            input_fn, output_fn,
         }
     }
     pub fn check_timeout(&mut self) -> Result<(), RuntimeError> {
@@ -40,16 +49,28 @@ impl<'a> Program<'a> {
     pub fn jump_back(&mut self, addr: usize) {
         self.pc = self.pc.wrapping_sub(addr);
     }
+    pub fn input(&mut self) -> u8 {
+        (self.input_fn)()
+    }
+    pub fn output(&mut self, value: u8) {
+        (self.output_fn)(value)
+    }
 }
 
-pub struct UnsafeProgram<'a, 'b> {
-    pub inner: &'b mut Program<'a>,
+pub struct UnsafeProgram<'a, 'b, I, O>
+where I: FnMut() -> u8,
+      O: FnMut(u8) -> (),
+ {
+    pub inner: &'b mut Program<'a, I, O>,
     insts_len: usize,
     internal_insts_at: *const Bytecode,
     internal_pc: *const Bytecode,
 }
-impl<'a, 'b> UnsafeProgram<'a, 'b> {
-    pub unsafe fn new(program: &'b mut Program<'a>) -> UnsafeProgram<'a, 'b> {
+impl<'a, 'b, I, O> UnsafeProgram<'a, 'b, I, O>
+where I: FnMut() -> u8,
+      O: FnMut(u8) -> (),
+ {
+    pub unsafe fn new(program: &'b mut Program<'a, I, O>) -> UnsafeProgram<'a, 'b, I, O> {
         let insts_len = program.insts.len();
         let internal_insts_at = program.insts.as_ptr();
         let pc = program.pc();
@@ -85,7 +106,10 @@ impl<'a, 'b> UnsafeProgram<'a, 'b> {
         self.internal_pc = self.internal_pc.add(1);
     }
 }
-impl<'a, 'b> Drop for UnsafeProgram<'a, 'b> {
+impl<'a, 'b, I, O> Drop for UnsafeProgram<'a, 'b, I, O>
+where I: FnMut() -> u8,
+      O: FnMut(u8) -> (),
+ {
     fn drop(&mut self) {
         self.inner.pc = self.pc();
     }

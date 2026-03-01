@@ -1,11 +1,6 @@
-use std::io::{Read, Write, stdin, stdout};
-
 use crate::{bytecode::bytecode::Bytecode, error::RuntimeError, vm::{program::Program, tape::Tape, tier::internal::{InterpreterResult, Tier}}};
 
-pub fn run_deopt(tape: &mut Tape, program: &mut Program) -> Result<InterpreterResult, RuntimeError> {
-    let mut stdout = stdout().lock();
-    let mut stdin = stdin().lock();
-    let mut stdin_buf: [u8; 1] = [0];
+pub fn run_deopt<I: FnMut() -> u8, O: FnMut(u8) -> ()>(tape: &mut Tape, program: &mut Program<I, O>) -> Result<InterpreterResult, RuntimeError> {
     let mut mul_val: u8 = 0;
     
     loop {
@@ -253,14 +248,11 @@ pub fn run_deopt(tape: &mut Tape, program: &mut Program) -> Result<InterpreterRe
 
             Bytecode::In { delta } => {
                 tape.step(*delta as isize);
-                match stdin.read_exact(&mut stdin_buf) {
-                    Ok(_) => tape.set(stdin_buf[0])?,
-                    Err(_) => tape.set(0)?,
-                }
+                tape.set(program.input())?;
             }
             Bytecode::Out { delta } => {
                 tape.step(*delta as isize);
-                stdout.write(&[tape.get()?])?;
+                program.output(tape.get()?);
             }
 
             Bytecode::JmpIfZero { delta, addr_abs } => {

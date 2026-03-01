@@ -4,7 +4,7 @@ pub mod internal;
 mod deopt;
 mod opt;
 
-pub fn run(tier: &mut Tier, tape: &mut Tape, program: &mut Program) -> Result<(), BrainrotError> {
+pub fn run<I: FnMut() -> u8, O: FnMut(u8) -> ()>(tier: &mut Tier, tape: &mut Tape, program: &mut Program<I, O>) -> Result<(), BrainrotError> {
     loop {
         let result = match tier {
             Tier::Deopt => run_deopt(tape, program),

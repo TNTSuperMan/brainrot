@@ -1,11 +1,6 @@
-use std::io::{Read, Write, stdin, stdout};
-
 use crate::{bytecode::bytecode::Bytecode, error::RuntimeError, vm::{program::UnsafeProgram, tape::UnsafeTape, tier::internal::{InterpreterResult, Tier}}};
 
-pub unsafe fn run_opt(tape: &mut UnsafeTape, program: &mut UnsafeProgram) -> Result<InterpreterResult, RuntimeError> {
-    let mut stdout = stdout().lock();
-    let mut stdin = stdin().lock();
-    let mut stdin_buf: [u8; 1] = [0];
+pub unsafe fn run_opt<I: FnMut() -> u8, O: FnMut(u8) -> ()>(tape: &mut UnsafeTape, program: &mut UnsafeProgram<I, O>) -> Result<InterpreterResult, RuntimeError> {
     let mut mul_val: u8 = 0;
     
     loop {
@@ -239,14 +234,11 @@ pub unsafe fn run_opt(tape: &mut UnsafeTape, program: &mut UnsafeProgram) -> Res
 
             Bytecode::In { delta } => {
                 tape.step_ptr((*delta) as isize);
-                match stdin.read_exact(&mut stdin_buf) {
-                    Ok(_) => tape.set(stdin_buf[0]),
-                    Err(_) => tape.set(0),
-                }
+                tape.set(program.inner.input());
             }
             Bytecode::Out { delta } => {
                 tape.step_ptr((*delta) as isize);
-                stdout.write(&[tape.get()])?;
+                program.inner.output(tape.get());
             }
 
             Bytecode::JmpIfZero { delta, addr_abs } => {

@@ -2,7 +2,7 @@ use std::io;
 
 use thiserror::Error;
 
-use crate::{bytecode::error::OptimizationError, ir::{error::SyntaxError, range::RangeError}};
+use crate::{bytecode::error::OptimizationError, ir::error::{SyntaxError, RangeError}};
 
 #[derive(Error, Debug)]
 pub enum RuntimeError {
