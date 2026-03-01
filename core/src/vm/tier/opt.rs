@@ -1,5 +1,6 @@
 use crate::{bytecode::bytecode::Bytecode, error::RuntimeError, vm::{program::UnsafeProgram, tape::UnsafeTape, tier::internal::{InterpreterResult, Tier}}};
 
+#[allow(unsafe_op_in_unsafe_fn)]
 pub unsafe fn run_opt<I: FnMut() -> u8, O: FnMut(u8) -> ()>(tape: &mut UnsafeTape, program: &mut UnsafeProgram<I, O>) -> Result<InterpreterResult, RuntimeError> {
     let mut mul_val: u8 = 0;
     

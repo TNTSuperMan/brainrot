@@ -70,6 +70,7 @@ where I: FnMut() -> u8,
     internal_insts_at: *const Bytecode,
     internal_pc: *const Bytecode,
 }
+#[allow(unsafe_op_in_unsafe_fn)]
 impl<'a, I, O> UnsafeProgram<'a, I, O>
 where I: FnMut() -> u8,
       O: FnMut(u8) -> (),

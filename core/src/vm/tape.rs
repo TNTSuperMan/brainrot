@@ -44,6 +44,8 @@ pub struct UnsafeTape<'a> {
     buffer_at: *mut u8,
     data_pointer: *mut u8,
 }
+
+#[allow(unsafe_op_in_unsafe_fn)]
 impl<'a> UnsafeTape<'a> {
     pub unsafe fn new(tape: &'a mut Tape) -> UnsafeTape<'a> {
         let buffer_at = tape.buffer.as_mut_ptr();
