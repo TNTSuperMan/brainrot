@@ -1,4 +1,4 @@
-use crate::{bytecode::bytecode::{Bytecode, ir_to_bytecodes}, error::BrainrotError, ir::{ir::{IR, parse_to_ir}, range::{RangeInfo, generate_range_info}}, vm::{program::Program, tape::Tape, tier::{BrainrotResult, internal::Tier, run}}};
+use crate::{bytecode::bytecode::{Bytecode, ir_to_bytecodes}, error::BrainrotError, ir::{ir::{IR, parse_to_ir}, range::{RangeInfo, generate_range_info}}, trace::{generate_bytecode_trace, generate_ir_trace}, vm::{program::Program, tape::Tape, tier::{BrainrotResult, internal::Tier, run}}};
 
 pub struct BrainrotInit<I, O>
 where I: FnMut() -> u8,
@@ -14,7 +14,7 @@ pub struct Brainrot<I, O>
 where I: FnMut() -> u8,
       O: FnMut(u8) -> (),
 {
-    ir: Vec<IR>, range: RangeInfo, bytecode: Vec<Bytecode>,
+    ir: Vec<IR>, range: RangeInfo,
 
     tier: Tier,
     tape: Tape,
@@ -33,7 +33,7 @@ where I: FnMut() -> u8,
         let tier = if range.do_opt_first { Tier::Opt } else { Tier::Deopt };
 
         Ok(Brainrot {
-            ir, range, bytecode: bytecode.clone(),
+            ir, range,
 
             tier,
             tape: Tape::new(),
@@ -48,5 +48,15 @@ where I: FnMut() -> u8,
     }
     pub fn get_tape_mut(&mut self, pointer: usize) -> Option<&mut u8> {
         self.tape.buffer.get_mut(pointer)
+    }
+    pub fn generate_trace(&self) -> String {
+        let mut trace = String::new();
+
+        trace += "IR:\n";
+        trace += &generate_ir_trace(&self.ir, &self.range);
+        trace += "\nBytecode:\n";
+        trace += &generate_bytecode_trace(&self.program);
+
+        return trace;
     }
 }

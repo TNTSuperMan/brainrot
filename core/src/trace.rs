@@ -13,7 +13,7 @@ impl OperationCountMap {
 
 use std::ops::RangeInclusive;
 
-use crate::{ir::IR, range::RangeInfo};
+use crate::{bytecode::bytecode::Bytecode, ir::{ir::{IR, IROp}, range::{MidRange, RangeInfo}}, vm::program::Program};
 
 fn range_to_string(range: &Option<RangeInclusive<usize>>) -> String {
     match range {
@@ -38,8 +38,6 @@ pub fn generate_ir_trace(ir_nodes: &[IR], range: &RangeInfo) -> String {
     }
 
     for (i, ir) in ir_nodes.iter().enumerate() {
-        use crate::ir::IROp;
-
         if let IROp::LoopEnd(..) = ir.opcode {
             lv -= 1;
         }
@@ -47,8 +45,6 @@ pub fn generate_ir_trace(ir_nodes: &[IR], range: &RangeInfo) -> String {
             lv -= 1;
         }
         if let Some(ri) = range.map.get(&i) {
-            use crate::range::MidRange;
-
             str += &format!("{} {}{} {:?} (deopt condition: {})\n", range_to_string(&ir.source_range), "    ".repeat(lv), ir.pointer, ir.opcode, match ri {
                 MidRange::None => format!("false"),
                 MidRange::Negative(r) => format!("ptr < {}", r.start),
@@ -68,7 +64,7 @@ pub fn generate_ir_trace(ir_nodes: &[IR], range: &RangeInfo) -> String {
 }
 
 
-pub fn generate_bytecode_trace(program: &Program) -> String {
+pub fn generate_bytecode_trace<I: FnMut() -> u8, O: FnMut(u8) -> ()>(program: &Program<I, O>) -> String {
     let mut str = String::new();
     let mut lv: usize = 0;
 
@@ -89,16 +85,4 @@ pub fn generate_bytecode_trace(program: &Program) -> String {
     str += &format!("step count(deopt/opt): {}/{}", program.ocm.deopt.iter().fold(0, |acc, e| acc + e), program.ocm.opt.iter().fold(0, |acc, e| acc + e));
 
     str
-}
-
-pub fn write_trace(tape: &Tape, program: &Program) -> Result<(), io::Error> {
-    if cfg!(feature = "debug") {
-        use std::fs;
-        use crate::cisc::trace::generate_bytecode_trace;
-
-        fs::write("./box/memory", *tape.buffer)?;
-        fs::write("./box/bytecodes", generate_bytecode_trace(&program))?;
-    }
-
-    Ok(())
 }
