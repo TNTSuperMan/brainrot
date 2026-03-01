@@ -2,7 +2,7 @@ use std::io;
 
 use thiserror::Error;
 
-use crate::{bytecode::error::OptimizationError, ir::range::RangeError};
+use crate::{bytecode::error::OptimizationError, ir::{error::SyntaxError, range::RangeError}};
 
 #[derive(Error, Debug)]
 pub enum RuntimeError {
@@ -23,14 +23,6 @@ pub enum RuntimeError {
 
     #[error("Timeouted")]
     TimeoutError,
-}
-
-#[derive(Error, Debug)]
-pub enum SyntaxError {
-    #[error("Unmatched opening bracket")]
-    UnmatchedOpeningBracket,
-    #[error("Unmatched closing bracket")]
-    UnmatchedClosingBracket,
 }
 
 #[derive(Error, Debug)]

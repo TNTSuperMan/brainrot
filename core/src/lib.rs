@@ -7,5 +7,5 @@ mod vm;
 mod trace;
 
 pub mod advance {
-    pub use crate::ir::ir::parse_to_ir;
+    pub use crate::ir::{ir::{parse_to_ir, IR, IROp}, range::{generate_range_info, RangeInfo, }};
 }
