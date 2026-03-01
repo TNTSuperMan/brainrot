@@ -8,4 +8,4 @@ clap = { version = "4.5.60", features = ["derive"] }
 core = { path = "../core" }
 
 [features]
-debug = []
+debug = ["core/debug"]
