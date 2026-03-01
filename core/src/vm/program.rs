@@ -1,21 +1,21 @@
 use crate::{bytecode::bytecode::Bytecode, error::RuntimeError, trace::OperationCountMap};
 
-pub struct Program<'a, I, O>
+pub struct Program<I, O>
 where I: FnMut() -> u8,
       O: FnMut(u8) -> (),
 {
     pub ocm: OperationCountMap,
-    insts: &'a [Bytecode],
+    insts: Box<[Bytecode]>,
     pc: usize,
     step_remains: Option<usize>,
     input_fn: I,
     output_fn: O,
 }
-impl<'a, I, O> Program<'a, I, O>
+impl<I, O> Program<I, O>
 where I: FnMut() -> u8,
       O: FnMut(u8) -> (),
 {
-    pub fn new(bytecodes: &'a [Bytecode], timeout: Option<usize>, input_fn: I, output_fn: O) -> Program<'a, I, O> {
+    pub fn new(bytecodes: Box<[Bytecode]>, timeout: Option<usize>, input_fn: I, output_fn: O) -> Program<I, O> {
         let ocm = OperationCountMap::new(bytecodes.len());
         Program {
             ocm,
@@ -35,7 +35,7 @@ where I: FnMut() -> u8,
         self.pc
     }
     pub fn insts(&self) -> &[Bytecode] {
-        self.insts
+        &self.insts
     }
     pub fn inst(&self) -> &Bytecode {
         &self.insts[self.pc]
@@ -57,20 +57,20 @@ where I: FnMut() -> u8,
     }
 }
 
-pub struct UnsafeProgram<'a, 'b, I, O>
+pub struct UnsafeProgram<'a, I, O>
 where I: FnMut() -> u8,
       O: FnMut(u8) -> (),
  {
-    pub inner: &'b mut Program<'a, I, O>,
+    pub inner: &'a mut Program<I, O>,
     insts_len: usize,
     internal_insts_at: *const Bytecode,
     internal_pc: *const Bytecode,
 }
-impl<'a, 'b, I, O> UnsafeProgram<'a, 'b, I, O>
+impl<'a, I, O> UnsafeProgram<'a, I, O>
 where I: FnMut() -> u8,
       O: FnMut(u8) -> (),
  {
-    pub unsafe fn new(program: &'b mut Program<'a, I, O>) -> UnsafeProgram<'a, 'b, I, O> {
+    pub unsafe fn new(program: &'a mut Program<I, O>) -> UnsafeProgram<'a, I, O> {
         let insts_len = program.insts.len();
         let internal_insts_at = program.insts.as_ptr();
         let pc = program.pc();
@@ -106,7 +106,7 @@ where I: FnMut() -> u8,
         self.internal_pc = self.internal_pc.add(1);
     }
 }
-impl<'a, 'b, I, O> Drop for UnsafeProgram<'a, 'b, I, O>
+impl<'a, I, O> Drop for UnsafeProgram<'a, I, O>
 where I: FnMut() -> u8,
       O: FnMut(u8) -> (),
  {
