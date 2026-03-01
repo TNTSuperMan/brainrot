@@ -8,10 +8,11 @@ mod trace;
 
 mod brainrot;
 
+pub use crate::brainrot::{Brainrot, BrainrotInit};
+
 pub mod advance {
     pub use crate::ir::*;
     pub use crate::bytecode::*;
     pub use crate::vm::*;
     pub use crate::trace::*;
-    pub use crate::brainrot::{Brainrot, BrainrotInit};
 }

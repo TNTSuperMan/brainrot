@@ -1,13 +1,13 @@
-use crate::{bytecode::bytecode::{Bytecode, ir_to_bytecodes}, error::BrainrotError, ir::{ir::{IR, parse_to_ir}, range::{RangeInfo, generate_range_info}}, trace::{generate_bytecode_trace, generate_ir_trace}, vm::{program::Program, tape::Tape, tier::{BrainrotResult, internal::Tier, run}}};
+use crate::{bytecode::bytecode::ir_to_bytecodes, error::BrainrotError, ir::{ir::{IR, parse_to_ir}, range::{RangeInfo, generate_range_info}}, trace::{generate_bytecode_trace, generate_ir_trace}, vm::{program::Program, tape::Tape, tier::{BrainrotResult, internal::Tier, run}}};
 
 pub struct BrainrotInit<I, O>
 where I: FnMut() -> u8,
       O: FnMut(u8) -> (),
 {
-    input: I,
-    output: O,
-    io_break: bool,
-    timeout_step: Option<usize>,
+    pub input: I,
+    pub output: O,
+    pub io_break: bool,
+    pub timeout_step: Option<usize>,
 }
 
 pub struct Brainrot<I, O>
