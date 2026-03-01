@@ -49,6 +49,9 @@ where I: FnMut() -> u8,
     pub fn get_tape_mut(&mut self, pointer: usize) -> Option<&mut u8> {
         self.tape.buffer.get_mut(pointer)
     }
+    pub fn set_timeout(&mut self, value: Option<usize>) {
+        self.program.step_remains = value;
+    }
     pub fn generate_trace(&self) -> String {
         let mut trace = String::new();
 
