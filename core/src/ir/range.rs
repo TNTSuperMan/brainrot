@@ -2,7 +2,7 @@ use std::{collections::HashMap, num::TryFromIntError, ops::{Range, RangeFrom, Ra
 
 use thiserror::Error;
 
-use crate::{TAPE_LENGTH, ir::{IR, IROp}};
+use crate::{TAPE_LENGTH, ir::ir::{IR, IROp}};
 
 #[derive(Error, Debug)]
 pub enum RangeError {

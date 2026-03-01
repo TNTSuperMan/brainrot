@@ -1,6 +1,6 @@
 use std::io::{Read, Write, stdin, stdout};
 
-use crate::cisc::{bytecode::Bytecode, error::RuntimeError, internal::{InterpreterResult, Tier}, tape::UnsafeTape, program::UnsafeProgram};
+use crate::{bytecode::bytecode::Bytecode, error::RuntimeError, vm::{program::UnsafeProgram, tape::UnsafeTape, tier::internal::{InterpreterResult, Tier}}};
 
 pub unsafe fn run_opt(tape: &mut UnsafeTape, program: &mut UnsafeProgram) -> Result<InterpreterResult, RuntimeError> {
     let mut stdout = stdout().lock();
@@ -247,9 +247,6 @@ pub unsafe fn run_opt(tape: &mut UnsafeTape, program: &mut UnsafeProgram) -> Res
             Bytecode::Out { delta } => {
                 tape.step_ptr((*delta) as isize);
                 stdout.write(&[tape.get()])?;
-                if program.inner.flush {
-                    stdout.flush()?;
-                }
             }
 
             Bytecode::JmpIfZero { delta, addr_abs } => {

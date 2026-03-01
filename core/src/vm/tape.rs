@@ -1,4 +1,4 @@
-use crate::{TAPE_LENGTH, cisc::error::RuntimeError};
+use crate::{TAPE_LENGTH, error::RuntimeError};
 
 pub struct Tape {
     pub buffer: Box<[u8; TAPE_LENGTH]>,

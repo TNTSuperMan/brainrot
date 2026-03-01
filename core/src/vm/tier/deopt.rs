@@ -1,6 +1,6 @@
 use std::io::{Read, Write, stdin, stdout};
 
-use crate::cisc::{bytecode::Bytecode, error::RuntimeError, internal::{InterpreterResult, Tier}, tape::Tape, program::Program};
+use crate::{bytecode::bytecode::Bytecode, error::RuntimeError, vm::{program::Program, tape::Tape, tier::internal::{InterpreterResult, Tier}}};
 
 pub fn run_deopt(tape: &mut Tape, program: &mut Program) -> Result<InterpreterResult, RuntimeError> {
     let mut stdout = stdout().lock();
@@ -261,9 +261,6 @@ pub fn run_deopt(tape: &mut Tape, program: &mut Program) -> Result<InterpreterRe
             Bytecode::Out { delta } => {
                 tape.step(*delta as isize);
                 stdout.write(&[tape.get()?])?;
-                if program.flush {
-                    stdout.flush()?;
-                }
             }
 
             Bytecode::JmpIfZero { delta, addr_abs } => {

@@ -1,21 +1,19 @@
-use crate::{cisc::{bytecode::Bytecode, error::RuntimeError}, trace::OperationCountMap};
+use crate::{bytecode::bytecode::Bytecode, error::RuntimeError, trace::OperationCountMap};
 
 pub struct Program<'a> {
     pub ocm: OperationCountMap,
     insts: &'a [Bytecode],
     pc: usize,
     step_remains: Option<usize>,
-    pub flush: bool,
 }
 impl<'a> Program<'a> {
-    pub fn new(bytecodes: &'a [Bytecode], flush: bool, timeout: Option<usize>) -> Program<'a> {
+    pub fn new(bytecodes: &'a [Bytecode], timeout: Option<usize>) -> Program<'a> {
         let ocm = OperationCountMap::new(bytecodes.len());
         Program {
             ocm,
             insts: bytecodes,
             pc: 0,
             step_remains: timeout,
-            flush,
         }
     }
     pub fn check_timeout(&mut self) -> Result<(), RuntimeError> {

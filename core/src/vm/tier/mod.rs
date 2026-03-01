@@ -1,0 +1,31 @@
+use crate::{error::BrainrotError, vm::{program::{Program, UnsafeProgram}, tape::{Tape, UnsafeTape}, tier::{deopt::run_deopt, internal::{InterpreterResult, Tier}, opt::run_opt}}};
+
+pub mod internal;
+mod deopt;
+mod opt;
+
+pub fn run(tier: &mut Tier, tape: &mut Tape, program: &mut Program) -> Result<(), BrainrotError> {
+    loop {
+        let result = match tier {
+            Tier::Deopt => run_deopt(tape, program),
+            Tier::Opt => unsafe {
+                run_opt(&mut UnsafeTape::new(tape), &mut UnsafeProgram::new(program))
+            },
+        };
+        match result {
+            Ok(InterpreterResult::End) => {
+                return Ok(());
+            }
+            Ok(InterpreterResult::ToggleTier(t)) => {
+                *tier = t;
+            }
+            Err(err) => {
+                return Err(BrainrotError::RuntimeError {
+                    err,
+                    pc: program.pc(),
+                    pointer: tape.data_pointer,
+                })
+            }
+        }
+    }
+}

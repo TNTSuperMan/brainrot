@@ -1,6 +1,6 @@
 use std::ops::RangeInclusive;
 
-use crate::{error::SyntaxError, range::extend_ri_pointer};
+use crate::{error::SyntaxError, ir::range::extend_ri_pointer};
 
 #[derive(Clone, Debug)]
 pub struct IR {
