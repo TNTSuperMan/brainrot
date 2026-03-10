@@ -6,6 +6,7 @@ use crate::{exec::{ExecResult, execute}, generate::generate_random_program};
 
 mod generate;
 mod exec;
+mod emu;
 
 fn main() {
     let mut rng = rng();
