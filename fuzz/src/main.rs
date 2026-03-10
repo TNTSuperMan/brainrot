@@ -1,30 +1,32 @@
-use std::io::{Write, stdout};
+use std::{io::{Write, stdout}, ops::Range};
 
 use rand::rng;
 
-use crate::{emu::exec_emu, exec::{ExecResult, execute}, generate::generate_random_program};
+use crate::step::step;
 
 mod generate;
 mod exec;
 mod emu;
+mod step;
+
+pub struct Config {
+    path: String,
+    timeout_step: u64,
+    timeout_ms: u64,
+    size_range: Range<usize>,
+}
 
 fn main() {
     let mut rng = rng();
     let mut stdout = stdout().lock();
+    let config = Config {
+        path: "target/debug/brainrot".to_string(),
+        timeout_step: 1000,
+        timeout_ms: 100,
+        size_range: 100..500,
+    };
     for _ in 0..100000 {
-        let code = generate_random_program(&mut rng, &(100..500));
-        let emures = exec_emu(&code, 1000);
-        if let Err(_e) = emures {
-            continue;
-        }
-        let res = execute("target/debug/cli", &code, 100);
-        match res {
-            ExecResult::Ok(_out) => print!("."),
-            ExecResult::Timeout => print!("_"),
-            ExecResult::Err(_e) => print!("!"),
-            ExecResult::Panic(panic) => println!("\nPanic!: {panic}"),
-            ExecResult::Core(core) => println!("\nCORE DUMPED!: {core}"),
-        }
+        step(&mut rng, &config);
         stdout.flush().unwrap();
     }
     println!("");
