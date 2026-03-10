@@ -12,7 +12,6 @@ pub enum ExecResult {
 }
 
 pub fn execute(path: &str, code: &str, timeout_ms: u64) -> ExecResult {
-    println!("ex");
     let duration = Duration::from_millis(timeout_ms);
 
     let mut child = Command::new(path)
@@ -42,11 +41,8 @@ pub fn execute(path: &str, code: &str, timeout_ms: u64) -> ExecResult {
             return ExecResult::Err(stderr);
         }
         None => {
-            println!("timeout");
             child.kill().unwrap();
-            println!("killed");
             child.wait().unwrap();
-            println!("waited");
             return ExecResult::Timeout;
         }
     }
