@@ -16,9 +16,7 @@ pub fn step(rng: &mut ThreadRng, config: &Config) {
         let execres = execute(&config.path, &code, config.timeout_ms);
         match execres {
             ExecResult::Ok(exout) => {
-                if exout == emout {
-                    print!(".");
-                } else {
+                if exout != emout {
                     report(rng, &code, "output unmatched");
                     print!("!");
                 }

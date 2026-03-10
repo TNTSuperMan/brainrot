@@ -1,4 +1,4 @@
-use std::{io::{Write, stdout}, ops::Range};
+use std::{io::{Write, stdout}, ops::Range, time::Instant};
 
 use rand::rng;
 
@@ -18,16 +18,18 @@ pub struct Config {
 
 fn main() {
     let mut rng = rng();
-    let mut stdout = stdout().lock();
     let config = Config {
         path: "target/debug/brainrot".to_string(),
         timeout_step: 1000,
         timeout_ms: 100,
-        size_range: 100..500,
+        size_range: 50..200,
     };
-    for _ in 0..100000 {
-        step(&mut rng, &config);
-        stdout.flush().unwrap();
+    loop {
+        let start = Instant::now();
+        for _ in 0..1000 {
+            step(&mut rng, &config);
+        }
+        let end = Instant::now();
+        println!("{:?}", (end - start) / 1000);
     }
-    println!("");
 }
