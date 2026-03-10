@@ -1,4 +1,4 @@
-use std::{io::{Write, stdout}, ops::Range, time::Instant};
+use std::{ops::Range, time::Instant};
 
 use rand::rng;
 
