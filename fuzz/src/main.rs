@@ -26,10 +26,10 @@ fn main() {
     };
     loop {
         let start = Instant::now();
-        for _ in 0..1000 {
+        for _ in 0..10000 {
             step(&mut rng, &config);
         }
         let end = Instant::now();
-        println!("{:?}", (end - start) / 1000);
+        println!("{:?}", (end - start) / 10000);
     }
 }
