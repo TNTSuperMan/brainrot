@@ -27,8 +27,9 @@ pub fn step(rng: &mut ThreadRng, config: &Config) {
                 // report(rng, &code, "timeout");
                 print!("_");
             },
-            ExecResult::Err(_e) => {
-                report(rng, &code, "unexpected oob");
+            ExecResult::Err(e) => {
+                report(rng, &code, &format!("unexpected err: {e}"));
+                print!("!");
             },
             ExecResult::Panic(panic) => {
                 println!("\n{panic}");
