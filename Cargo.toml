@@ -1,3 +1,3 @@
 [workspace]
-members = ["cli","core", "fuzz"]
+members = ["cli","core", "fuzz", "irutil"]
 resolver = "2"
