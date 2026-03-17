@@ -12,25 +12,25 @@ impl Tape {
         }
     }
     pub fn get(&self) -> Result<u8, RuntimeError> {
-        self.buffer.get(self.data_pointer).ok_or_else(|| RuntimeError::OOBGet(self.data_pointer)).copied()
+        self.buffer.get(self.data_pointer).ok_or_else(|| RuntimeError::OOBGet(self.data_pointer as isize)).copied()
     }
     pub fn set(&mut self, value: u8) -> Result<(), RuntimeError> {
-        let cell = self.buffer.get_mut(self.data_pointer).ok_or_else(|| RuntimeError::OOBSet(self.data_pointer, value))?;
+        let cell = self.buffer.get_mut(self.data_pointer).ok_or_else(|| RuntimeError::OOBSet(self.data_pointer as isize, value))?;
         Ok(*cell = value)
     }
     pub fn add(&mut self, value: u8) -> Result<(), RuntimeError> {
-        let cell = self.buffer.get_mut(self.data_pointer).ok_or_else(|| RuntimeError::OOBAdd(self.data_pointer, value))?;
+        let cell = self.buffer.get_mut(self.data_pointer).ok_or_else(|| RuntimeError::OOBAdd(self.data_pointer as isize, value))?;
         Ok(*cell = cell.wrapping_add(value))
     }
     
     pub fn add_with_offset(&mut self, delta: isize, value: u8) -> Result<(), RuntimeError> {
         let ptr = self.data_pointer.wrapping_add_signed(delta);
-        let cell = self.buffer.get_mut(ptr).ok_or_else(|| RuntimeError::OOBAdd(ptr, value))?;
+        let cell = self.buffer.get_mut(ptr).ok_or_else(|| RuntimeError::OOBAdd(ptr as isize, value))?;
         Ok(*cell = cell.wrapping_add(value))
     }
     pub fn sub_with_offset(&mut self, delta: isize, value: u8) -> Result<(), RuntimeError> {
         let ptr = self.data_pointer.wrapping_add_signed(delta);
-        let cell = self.buffer.get_mut(ptr).ok_or_else(|| RuntimeError::OOBSub(ptr, value))?;
+        let cell = self.buffer.get_mut(ptr).ok_or_else(|| RuntimeError::OOBSub(ptr as isize, value))?;
         Ok(*cell = cell.wrapping_sub(value))
     }
 
@@ -68,14 +68,14 @@ impl<'a> UnsafeTape<'a> {
     }
 
     pub fn get_safe(&self, abs_ptr: usize) -> Result<u8, RuntimeError> {
-        self.inner.buffer.get(abs_ptr).ok_or_else(|| RuntimeError::OOBGet(abs_ptr)).copied()
+        self.inner.buffer.get(abs_ptr).ok_or_else(|| RuntimeError::OOBGet(abs_ptr as isize)).copied()
     }
     pub unsafe fn get(&self) -> u8 {
         if cfg!(feature = "debug") { self.rangecheck(0); }
         *self.data_pointer
     }
     pub fn set_safe(&mut self, abs_ptr: usize, value: u8) -> Result<(), RuntimeError> {
-        let cell = self.inner.buffer.get_mut(abs_ptr).ok_or_else(|| RuntimeError::OOBSet(abs_ptr, value))?;
+        let cell = self.inner.buffer.get_mut(abs_ptr).ok_or_else(|| RuntimeError::OOBSet(abs_ptr as isize, value))?;
         Ok(*cell = value)
     }
     pub unsafe fn set(&mut self, value: u8) {
@@ -83,7 +83,7 @@ impl<'a> UnsafeTape<'a> {
         *self.data_pointer = value;
     }
     pub fn add_safe(&mut self, abs_ptr: usize, value: u8) -> Result<(), RuntimeError> {
-        let cell = self.inner.buffer.get_mut(abs_ptr).ok_or_else(|| RuntimeError::OOBSet(abs_ptr, value))?;
+        let cell = self.inner.buffer.get_mut(abs_ptr).ok_or_else(|| RuntimeError::OOBSet(abs_ptr as isize, value))?;
         Ok(*cell = cell.wrapping_add(value))
     }
     pub unsafe fn add(&mut self, value: u8) {

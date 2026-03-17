@@ -7,16 +7,16 @@ use crate::{bytecode::error::OptimizationError, ir::error::{SyntaxError, RangeEr
 #[derive(Error, Debug)]
 pub enum RuntimeError {
     #[error("Out of bounds while getting cell {0}")]
-    OOBGet(usize),
+    OOBGet(isize),
     
     #[error("Out of bounds while setting {1} to cell {0}")]
-    OOBSet(usize, u8),
+    OOBSet(isize, u8),
     
     #[error("Out of bounds while adding {1} to cell {0}")]
-    OOBAdd(usize, u8),
+    OOBAdd(isize, u8),
     
     #[error("Out of bounds while subtracting {1} to cell {0}")]
-    OOBSub(usize, u8),
+    OOBSub(isize, u8),
 
     #[error("{0}")]
     IOError(#[from] io::Error),
@@ -33,7 +33,7 @@ pub enum BrainrotError {
     #[error("OptimizationError: {0}")]
     OptimizationError(#[from] OptimizationError),
 
-    #[error("RuntimeError: {err}")]
+    #[error("RuntimeError: {err}, pc: {pc}")]
     RuntimeError{
         #[source]
         err: RuntimeError,
